@@ -1,18 +1,28 @@
-EXE_NAME     := myROOTCommand
-OBJECTS      := myROOTCommand.o
+EXE_NAME := myROOTCommand
+OBJECTS  := myROOTCommand.o
 
+# Extract CXXFLAGS cleanly without extra -I prefix
+CXXFLAGS := -std=c++17 -g -Wall $(shell root-config --cflags)
+LDFLAGS  := -Wl
+LDLIBS   := $(shell root-config --libs) -lvectorDict
+
+.PHONY: all clean
+
+all: $(EXE_NAME)
+
+# Link executable
 $(EXE_NAME): $(OBJECTS)
-	g++ -Wl,-rpath,${ROOTSYS}/lib  -g -Wall -o $@ $^  `root-config --libs` -lvectorDict
+	g++ $(LDFLAGS) -g -Wall -o $@ $^ $(LDLIBS)
 
-cc=g++  -std=c++11 -g -Wall -I $(shell root-config --cflags) -o
+# Pattern rule for object files (.cpp source)
+%.o: %.cpp
+	g++ $(CXXFLAGS) -c $< -o $@
 
-$(OBJECTS:.o=.d): %.d: %.c
-	$(cc) $@ -MM -MT '$(@:.d=.o) $@' $<
--include $(OBJECTS:.o=.d) 
-$(OBJECTS): 
-	$(cc) $@ -c $<
+# Pattern rule for auto-generated dependencies (.d)
+%.d: %.cpp
+	g++ $(CXXFLAGS) -MM -MT '$*.o $@' $< -o $@
 
+-include $(OBJECTS:.o=.d)
 
 clean:
 	rm -f *.o *.d *~ \#* $(EXE_NAME)
-
