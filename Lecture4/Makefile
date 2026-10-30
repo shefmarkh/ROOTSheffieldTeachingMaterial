@@ -3,7 +3,7 @@ OBJECTS  := myROOTCommand.o
 
 # Extract CXXFLAGS cleanly without extra -I prefix
 CXXFLAGS := -std=c++17 -g -Wall $(shell root-config --cflags)
-LDFLAGS  := -Wl
+LDFLAGS  := -Wl,-rpath,$(ROOTSYS)/lib
 LDLIBS   := $(shell root-config --libs) -lvectorDict
 
 .PHONY: all clean
